@@ -1,2 +1,5 @@
 .vsconfig
 .vs
+Binary/
+Intermediate/
+Saved/
