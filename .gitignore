@@ -3,3 +3,8 @@
 Binaries/
 Intermediate/
 Saved/
+
+#先忽略所有添加的资产文件，因为太大
+Content/BlackAlder
+Content/EuropeanBeech
+Content/EuropeanHornbeam
