@@ -43,7 +43,7 @@ class AAFarmSimulationCharacter : public ACharacter
 	/** Look Input Action */
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* LookAction;
-
+	
 public:
 	AAFarmSimulationCharacter();
 	
@@ -69,5 +69,26 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+private:
+	void ViewChange();
+
+	UPROPERTY(VisibleAnywhere, Category = "Components")
+	bool bIsTopDownView; // 是否处于非第三人称视角
+
+	// 俯视角相机的位置和旋转
+	UPROPERTY(EditAnywhere, Category = "Camera")
+	FVector TopDownCameraLocation;
+
+	UPROPERTY(EditAnywhere, Category = "Camera")
+	FRotator TopDownCameraRotation;
+
+	// 保存默认的第三人称相机
+	FVector DefaultCameraLocation;
+	FRotator DefaultCameraRotation;
+
+	// 角色的网格体
+	UPROPERTY(VisibleAnywhere, Category = "Components")
+	USkeletalMeshComponent* CharacterMesh;
 };
 
