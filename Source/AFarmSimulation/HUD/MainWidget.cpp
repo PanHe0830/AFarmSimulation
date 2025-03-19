@@ -32,12 +32,11 @@ void UMainWidget::SetMenuWidget()
 		if (PlayerController)
 		{
 			FInputModeGameAndUI InputModeData;
-			InputModeData.SetHideCursorDuringCapture(false);// 捕获鼠标时不隐藏光标
+			//InputModeData.SetHideCursorDuringCapture(false);// 捕获鼠标时不隐藏光标
 			PlayerController->SetInputMode(InputModeData);
-			PlayerController->SetShowMouseCursor(true);/* 看到光标 */
+			//PlayerController->SetShowMouseCursor(true);/* 看到光标 */
 		}
 	}
-
 }
 
 void UMainWidget::TestButtonFunc()
