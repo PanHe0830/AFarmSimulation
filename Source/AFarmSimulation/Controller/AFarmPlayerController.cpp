@@ -2,35 +2,42 @@
 
 
 #include "AFarmPlayerController.h"
+#include "AFarmSimulation/AFarmSimulationCharacter.h"
+#include "AFarmSimulation/Character/TopCharacter.h"
+#include "AFarmSimulation/GameMode/FarmGameMode.h"
 #include "Kismet/GameplayStatics.h"
-#include "Camera/CameraActor.h"
-#include "GameFramework/Character.h"
 
-#if 0
 AAFarmPlayerController::AAFarmPlayerController()
 {
-    bShowMouseCursor = true;
-    bEnableClickEvents = true;
-    bEnableMouseOverEvents = true;
-
-    bIsTopDownView = true; // 初始状态为俯视角
+    TopCharacter = nullptr;
+    ThridCharacter = nullptr;
+    bIsTopViewPort = true;
 }
 
 void AAFarmPlayerController::BeginPlay()
 {
     Super::BeginPlay();
 
-    // 在世界中创建俯视摄像机
-    FActorSpawnParameters SpawnParams;
-    SpawnParams.Owner = this;
-    TopDownCamera = GetWorld()->SpawnActor<ACameraActor>(ACameraActor::StaticClass(), SpawnParams);
+    // 获取默认 ACharacter
+    ThridCharacter = Cast<AAFarmSimulationCharacter>(GetCharacter()); // 游戏开始时默认 Possess ACharacter
 
-    if (TopDownCamera)
+    // 查找 BP_TopPawn
+    TArray<AActor*> FoundActors;
+    UGameplayStatics::GetAllActorsOfClass(GetWorld(), ATopCharacter::StaticClass(), FoundActors);
+
+    for (AActor* Actor : FoundActors)
     {
-        CameraStartLocation = FVector(0, 0, 1500); // 俯视角初始位置
-        TopDownCamera->SetActorLocation(CameraStartLocation);
-        TopDownCamera->SetActorRotation(FRotator(-90, 0, 0)); // 俯视角朝向地面
-        SetViewTarget(TopDownCamera);
+        if (Actor->IsA(ATopCharacter::StaticClass()) && Actor->GetName().Contains("BP_TopCharacter"))
+        {
+            TopCharacter = Cast<ATopCharacter>(Actor);
+            break;
+        }
+    }
+
+    if (TopCharacter)
+    {
+        TopCharacter->SetActorHiddenInGame(true);
+        TopCharacter->SetActorEnableCollision(false);
     }
 }
 
@@ -38,50 +45,38 @@ void AAFarmPlayerController::SetupInputComponent()
 {
     Super::SetupInputComponent();
 
-    InputComponent->BindAction("ToggleView", IE_Pressed, this, &AAFarmPlayerController::ToggleViewMode);
-    InputComponent->BindAxis("MoveForward", this, &AAFarmPlayerController::MoveForward);
-    InputComponent->BindAxis("MoveRight", this, &AAFarmPlayerController::MoveRight);
+    InputComponent->BindAction("ChangeViewPort", IE_Pressed, this, &AAFarmPlayerController::SwitchCameraView);
 }
 
-void AAFarmPlayerController::ToggleViewMode()
+void AAFarmPlayerController::SwitchCameraView()
 {
-    if (bIsTopDownView)
+    if (!ThridCharacter || !TopCharacter) return;
+
+    if (bIsTopViewPort)
     {
-        // 切换回第三人称
-        ACharacter* PlayerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
-        if (PlayerCharacter)
-        {
-            SetViewTarget(PlayerCharacter);
-        }
+        // 切换到 DefaultPawn
+        ThridCharacter->SetActorHiddenInGame(true);
+        ThridCharacter->SetActorEnableCollision(false);
+
+        TopCharacter->SetActorHiddenInGame(false);
+        TopCharacter->SetActorEnableCollision(true);
+        TopCharacter->SetActorLocation(ThridCharacter->GetActorLocation());
+
+        Possess(TopCharacter);
+        bIsTopViewPort = false;
+        UE_LOG(LogTemp , Warning , TEXT("DefaultPawn"));
     }
     else
     {
-        // 切换到俯视角
-        if (TopDownCamera)
-        {
-            SetViewTarget(TopDownCamera);
-        }
-    }
+        // 切换回 ACharacter
+        TopCharacter->SetActorHiddenInGame(true);
+        TopCharacter->SetActorEnableCollision(false);
 
-    bIsTopDownView = !bIsTopDownView;
-}
+        ThridCharacter->SetActorHiddenInGame(false);
+        ThridCharacter->SetActorEnableCollision(true);
 
-void AAFarmPlayerController::MoveForward(float Value)
-{
-    if (bIsTopDownView && TopDownCamera)
-    {
-        FVector MoveDirection = FVector(1, 0, 0);
-        TopDownCamera->AddActorWorldOffset(MoveDirection * Value * 10);
+        Possess(ThridCharacter);
+        bIsTopViewPort = true;
+        UE_LOG(LogTemp, Warning, TEXT("ACharacter"));
     }
 }
-
-void AAFarmPlayerController::MoveRight(float Value)
-{
-    if (bIsTopDownView && TopDownCamera)
-    {
-        FVector MoveDirection = FVector(0, 1, 0);
-        TopDownCamera->AddActorWorldOffset(MoveDirection * Value * 10);
-    }
-}
-
-#endif

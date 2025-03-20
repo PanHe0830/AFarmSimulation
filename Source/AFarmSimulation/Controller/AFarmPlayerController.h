@@ -9,31 +9,25 @@
 /**
  * 
  */
+class ATopCharacter;
+class AAFarmSimulationCharacter;
+
 UCLASS()
 class AFARMSIMULATION_API AAFarmPlayerController : public APlayerController
 {
 	GENERATED_BODY()
-
-#if 0
 public:
-    AAFarmPlayerController();
-
+	AAFarmPlayerController();
 protected:
-    virtual void BeginPlay() override;
-    virtual void SetupInputComponent() override;
+	virtual void BeginPlay() override;
 
-    // 视角切换
-    void ToggleViewMode();
-
-    // 移动控制
-    void MoveForward(float Value);
-    void MoveRight(float Value);
+	virtual void SetupInputComponent() override;
 
 private:
-    bool bIsTopDownView;  // 是否处于俯视角模式
-    UPROPERTY(VisibleAnywhere, Category = "Camera")
-    class ACameraActor* TopDownCamera; // 俯视摄像机
-    FVector CameraStartLocation; // 记录初始位置
+	void SwitchCameraView();
 
-#endif
+	ATopCharacter* TopCharacter;
+	AAFarmSimulationCharacter* ThridCharacter;
+
+	bool bIsTopViewPort;
 };

@@ -3,19 +3,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/GameMode.h"
-#include "FarmGameMode.generated.h"
+#include "GameFramework/DefaultPawn.h"
+#include "TopCharacter.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class AFARMSIMULATION_API AFarmGameMode : public AGameMode
+class AFARMSIMULATION_API ATopCharacter : public ADefaultPawn
 {
 	GENERATED_BODY()
-public:
-	AFarmGameMode();
-
-public:
 	
 };

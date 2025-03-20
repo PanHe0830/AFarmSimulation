@@ -54,12 +54,21 @@ AAFarmSimulationCharacter::AAFarmSimulationCharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
+
 }
 
 void AAFarmSimulationCharacter::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
+}
+
+void AAFarmSimulationCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	DrawDebugSphere(GetWorld(), CameraBoom->GetComponentLocation(), 20.0f, 12, FColor::Red, false, 0.1f);
+	DrawDebugLine(GetWorld(), FollowCamera->GetComponentLocation(), CameraBoom->GetComponentLocation(), FColor::Green, false, 0.1f);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -93,7 +102,6 @@ void AAFarmSimulationCharacter::SetupPlayerInputComponent(UInputComponent* Playe
 	{
 		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
 	}
-
 }
 
 void AAFarmSimulationCharacter::Move(const FInputActionValue& Value)
@@ -129,6 +137,5 @@ void AAFarmSimulationCharacter::Look(const FInputActionValue& Value)
 		// add yaw and pitch input to controller
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
-		
 	}
 }
