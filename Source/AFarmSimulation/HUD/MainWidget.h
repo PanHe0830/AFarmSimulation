@@ -14,6 +14,10 @@
  * 
  */
 class UButton;
+class UHouseBuildWidget;
+class UCanvasPanel;
+class UScaleBox;
+class USizeBox;
 
 UCLASS()
 class AFARMSIMULATION_API UMainWidget : public UUserWidget
@@ -33,5 +37,33 @@ public:
 
 private:
 	UFUNCTION()
-	void TestButtonFunc();
+	void TestButtonFunc(); 
+
+	UFUNCTION()
+	void ShowChildWidget();
+
+	FVector2D GetCanvasPanelLocation();
+	
+	// 弹出的 Widget 类
+	UPROPERTY(EditDefaultsOnly, Category = "UI")
+	TSubclassOf<UHouseBuildWidget> HouseWidgetClass;
+
+	// 弹出的 Widget 实例
+	UPROPERTY()
+	UHouseBuildWidget* HouseWidgetInstance;
+
+	UPROPERTY(meta = (BindWidget))
+	UCanvasPanel* CanvasPanel;
+
+	//UPROPERTY(meta = (BindWidget))
+	//UCanvasPanel* ShowCanvasPanel;
+
+	UPROPERTY(meta = (BindWidget))
+	UButton* Button_92;
+
+	UPROPERTY(meta = (BindWidget))
+	UScaleBox* ScaleBox_0;
+
+	UPROPERTY(meta = (BindWidget))
+	USizeBox* SizeBox_0;
 };

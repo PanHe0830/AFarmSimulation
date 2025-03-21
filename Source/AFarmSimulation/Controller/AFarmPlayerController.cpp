@@ -12,6 +12,7 @@ AAFarmPlayerController::AAFarmPlayerController()
     TopCharacter = nullptr;
     ThridCharacter = nullptr;
     bIsTopViewPort = true;
+    SetShowMouseCursor(true);
 }
 
 void AAFarmPlayerController::BeginPlay()
@@ -64,7 +65,7 @@ void AAFarmPlayerController::SwitchCameraView()
 
         Possess(TopCharacter);
         bIsTopViewPort = false;
-        UE_LOG(LogTemp , Warning , TEXT("DefaultPawn"));
+        //UE_LOG(LogTemp , Warning , TEXT("DefaultPawn"));
     }
     else
     {
@@ -77,6 +78,6 @@ void AAFarmPlayerController::SwitchCameraView()
 
         Possess(ThridCharacter);
         bIsTopViewPort = true;
-        UE_LOG(LogTemp, Warning, TEXT("ACharacter"));
+        //UE_LOG(LogTemp, Warning, TEXT("ACharacter"));
     }
 }
