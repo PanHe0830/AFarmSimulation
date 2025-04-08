@@ -2,4 +2,15 @@
 
 
 #include "TopCharacter.h"
+#include "Components/PrimitiveComponent.h"
+#include "Components/SphereComponent.h"
 
+ATopCharacter::ATopCharacter()
+{
+
+}
+
+void ATopCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+}

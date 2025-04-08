@@ -55,6 +55,7 @@ AAFarmSimulationCharacter::AAFarmSimulationCharacter()
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 
+	GetCapsuleComponent();
 }
 
 void AAFarmSimulationCharacter::BeginPlay()
@@ -67,8 +68,8 @@ void AAFarmSimulationCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	DrawDebugSphere(GetWorld(), CameraBoom->GetComponentLocation(), 20.0f, 12, FColor::Red, false, 0.1f);
-	DrawDebugLine(GetWorld(), FollowCamera->GetComponentLocation(), CameraBoom->GetComponentLocation(), FColor::Green, false, 0.1f);
+	//DrawDebugSphere(GetWorld(), CameraBoom->GetComponentLocation(), 20.0f, 12, FColor::Red, false, 0.1f);
+	//DrawDebugLine(GetWorld(), FollowCamera->GetComponentLocation(), CameraBoom->GetComponentLocation(), FColor::Green, false, 0.1f);
 }
 
 //////////////////////////////////////////////////////////////////////////

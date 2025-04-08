@@ -14,4 +14,8 @@ class AFARMSIMULATION_API ATopCharacter : public ADefaultPawn
 {
 	GENERATED_BODY()
 	
+public:
+	ATopCharacter();
+
+	virtual void BeginPlay() override;
 };

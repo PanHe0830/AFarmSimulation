@@ -12,7 +12,7 @@ ATreeActor::ATreeActor()
 
 	StaticMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Tree"));
 	//StaticMesh->SetupAttachment(RootComponent);
-	RootComponent = StaticMesh;
+	SetRootComponent(StaticMesh);
 }
 
 // Called when the game starts or when spawned

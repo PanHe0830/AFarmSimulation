@@ -10,6 +10,10 @@
 #include "Blueprint/UserWidget.h"
 #include "MainWidget.generated.h"
 
+#define _EMPTY_WIDGET_ 0
+#define _BUIlD_WIDGET_ 1
+#define _HOUSE_WIDGET_ 2
+
 /**
  * 
  */
@@ -18,6 +22,8 @@ class UHouseBuildWidget;
 class UCanvasPanel;
 class UScaleBox;
 class USizeBox;
+class UWidgetSwitcher;
+class UBuildWidget;
 
 UCLASS()
 class AFARMSIMULATION_API UMainWidget : public UUserWidget
@@ -26,44 +32,34 @@ class AFARMSIMULATION_API UMainWidget : public UUserWidget
 
 protected:
 	virtual bool Initialize() override;
-	
+
 public:
 	UFUNCTION(BlueprintCallable)
 	void SetMenuWidget();
 
-public:
-	UPROPERTY(meta = (BindWidget))
-	UButton* TestButton;
-
 private:
 	UFUNCTION()
-	void TestButtonFunc(); 
+	void UseWidgetSwitcherChangeWidgetButtonBuild();
 
 	UFUNCTION()
-	void ShowChildWidget();
+	void UseWidgetSwitcherChangeWidgetButtonAssert();
 
-	FVector2D GetCanvasPanelLocation();
-	
-	// 弹出的 Widget 类
-	UPROPERTY(EditDefaultsOnly, Category = "UI")
-	TSubclassOf<UHouseBuildWidget> HouseWidgetClass;
+private:
+	void ChangeUserWidgetIndex(int index);
 
-	// 弹出的 Widget 实例
-	UPROPERTY()
-	UHouseBuildWidget* HouseWidgetInstance;
+public:
+	// 存放建造物的UI界面
+	UPROPERTY(EditAnywhere, Category = "ChildWidget");
+	TSubclassOf<UBuildWidget> BuildWidget;
 
-	UPROPERTY(meta = (BindWidget))
-	UCanvasPanel* CanvasPanel;
-
-	//UPROPERTY(meta = (BindWidget))
-	//UCanvasPanel* ShowCanvasPanel;
+	UPROPERTY(meta = (BindWidget), BlueprintReadWrite)
+	UWidgetSwitcher* WidgetSwitcher;
 
 	UPROPERTY(meta = (BindWidget))
-	UButton* Button_92;
+	UButton* ButtonBuild;
+
+	int CurrentWidgetIndex; // 当前窗口的下标
 
 	UPROPERTY(meta = (BindWidget))
-	UScaleBox* ScaleBox_0;
-
-	UPROPERTY(meta = (BindWidget))
-	USizeBox* SizeBox_0;
+	UButton* ButtonAssert;
 };
