@@ -3,20 +3,19 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "SpawnActorBase.h"
-#include "TreeActor.generated.h"
+#include "GameFramework/Actor.h"
+#include "SpawnActorBase.generated.h"
 
-class UStaticMesh;
 class UBoxComponent;
 
 UCLASS()
-class AFARMSIMULATION_API ATreeActor : public ASpawnActorBase
+class AFARMSIMULATION_API ASpawnActorBase : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
-	ATreeActor();
+	ASpawnActorBase();
 
 protected:
 	// Called when the game starts or when spawned
@@ -26,6 +25,10 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(EditAnywhere, Category = "TreeBox")
-	UBoxComponent* TreeBoxComponent;
+public:
+	UPROPERTY(EditAnywhere, Category = "SpawnActor")
+	UStaticMeshComponent* StaticMesh;
+
+	UPROPERTY(EditAnywhere, Category = "SpawnActor")
+	UBoxComponent* BoxComponent;
 };

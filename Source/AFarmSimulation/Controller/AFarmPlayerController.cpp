@@ -14,6 +14,7 @@ AAFarmPlayerController::AAFarmPlayerController()
     TopCharacter = nullptr;
     ThridCharacter = nullptr;
     bIsTopViewPort = true;
+    SpawnLocation = FVector::ZeroVector;
     SetShowMouseCursor(true);
 }
 
@@ -86,29 +87,25 @@ void AAFarmPlayerController::SwitchCameraView()
 
 void AAFarmPlayerController::MouseLeftClicked()
 {
-    FHitResult HitResult;
-    GetHitResultUnderCursor(ECC_Visibility, false, HitResult); // ECC_Visibility 表示检测可见物体
-
-    //if (HitResult.bBlockingHit)
-    //{
-    //    FVector WorldLocation = HitResult.Location;
-    //    //UE_LOG(LogTemp, Warning, TEXT("Clicked at: %s"), *WorldLocation.ToString());
-    //
-    //    // 可以在这里生成一个调试点（Debug Sphere）来可视化点击位置
-    //    DrawDebugSphere(GetWorld(), WorldLocation, 10.f, 12, FColor::Red, false, 2.f);
-    //}
-
+    //FHitResult HitResult;
+    //GetHitResultUnderCursor(ECC_Visibility, false, HitResult); // ECC_Visibility 表示检测可见物体
     FRotator rotator(0, 0, 0);
-
-    UWorld* World = GetWorld();
-    if (World && TreeClass)
+    UBuildSubsystem* Build = GetGameInstance()->GetSubsystem<UBuildSubsystem>();
+    if (Build)
     {
-        World->SpawnActor<ATreeActor>( 
-            TreeClass, 
-            HitResult.Location,
-            rotator
-        );
+        Build->HidePreview();
+        Build->TryBuildAtLocation(TreeClass, SpawnLocation, rotator);
     }
+    
+    //UWorld* World = GetWorld();
+    //if (World && TreeClass)
+    //{
+    //    World->SpawnActor<ATreeActor>( 
+    //        TreeClass, 
+    //        HitResult.Location,
+    //        rotator
+    //    );
+    //}
 
     InputComponent->RemoveActionBinding("MouseLeftClicked", IE_Pressed);
     InputComponent->RemoveAxisBinding("BuildMouseXY");
@@ -126,7 +123,11 @@ void AAFarmPlayerController::OpenBuildMode()
     UBuildSubsystem* Build = GetGameInstance()->GetSubsystem<UBuildSubsystem>();
     if (Build)
     {
-        Build->ShowPreview(TreeClass, HitResult.Location, Ratotor);
+        UE_LOG(LogTemp, Warning, TEXT("Build is success"));
+        if (Build->ShowPreview(TreeClass, HitResult.Location, Ratotor))
+        {
+            SpawnLocation = HitResult.Location;
+        }
     }
 }
 
@@ -148,7 +149,7 @@ void AAFarmPlayerController::MouseXY(float XY)
     if (Build)
     {
         Build->ChangePreviewActorPosition(HitResult.Location);
-        UE_LOG(LogTemp, Warning, TEXT("%s"), *HitResult.Location.ToString());
+        //UE_LOG(LogTemp, Warning, TEXT("%s"), *HitResult.Location.ToString());
     }
     
 }

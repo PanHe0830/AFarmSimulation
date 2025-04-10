@@ -41,4 +41,6 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<class ATreeActor> TreeClass;
+
+	FVector SpawnLocation;
 };

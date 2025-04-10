@@ -25,7 +25,7 @@ public:
 
     // 尝试在指定位置建造
     UFUNCTION(BlueprintCallable, Category = "Build System")
-    bool TryBuildAtLocation(AActor* BuildingToPlace, const FVector& Location, const FRotator& Rotation);
+    bool TryBuildAtLocation(TSubclassOf<AActor> BuildingToPlace, const FVector& Location, const FRotator& Rotation);
 
 private:
     // 执行碰撞检测
@@ -36,7 +36,7 @@ private:
 
 public:
     UFUNCTION(BlueprintCallable, Category = "Build System")
-    void ShowPreview(TSubclassOf<AActor> BuildingTemplate, const FVector& Location, const FRotator& Rotation);
+    bool ShowPreview(TSubclassOf<AActor> BuildingTemplate, const FVector& Location, const FRotator& Rotation);
 
     UFUNCTION(BlueprintCallable, Category = "Build System")
     void HidePreview();
@@ -44,4 +44,6 @@ public:
     UFUNCTION(BlueprintCallable, Category = "Build System")
     void ChangePreviewActorPosition(FVector position);
 
+    UPROPERTY(VisibleAnywhere, Category = "Build System")
+    FVector SpawnLocation;
 };

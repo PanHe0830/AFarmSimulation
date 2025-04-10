@@ -9,6 +9,8 @@
 void UBuildSubsystem::Initialize(FSubsystemCollectionBase& Collection)
 {
 	Super::Initialize(Collection);
+
+    SpawnLocation = FVector::ZeroVector;
 }
 
 void UBuildSubsystem::Deinitialize()
@@ -21,21 +23,9 @@ bool UBuildSubsystem::CanBuildAtLocation(const FVector& Location, const FRotator
     return !CheckBuildLocation(Location, Rotation, Extents);
 }
 
-bool UBuildSubsystem::TryBuildAtLocation(AActor* BuildingToPlace, const FVector& Location, const FRotator& Rotation)
+bool UBuildSubsystem::TryBuildAtLocation(TSubclassOf<AActor> BuildingToPlace, const FVector& Location, const FRotator& Rotation)
 {
     if (!BuildingToPlace) return false;
-
-    // 获取建筑的碰撞体范围
-    UBoxComponent* BuildCollision = BuildingToPlace->FindComponentByClass<UBoxComponent>();
-    if (!BuildCollision) return false;
-
-    FVector Extents = BuildCollision->GetScaledBoxExtent();
-
-    // 检查位置是否可用
-    if (CheckBuildLocation(Location, Rotation, Extents))
-    {
-        return false;
-    }
 
     // 生成建筑
     UWorld* World = GetWorld();
@@ -45,11 +35,29 @@ bool UBuildSubsystem::TryBuildAtLocation(AActor* BuildingToPlace, const FVector&
     SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
     AActor* NewBuilding = World->SpawnActor<AActor>(
-        BuildingToPlace->GetClass(),
+        BuildingToPlace,
         Location,
         Rotation,
         SpawnParams
     );
+
+    // 获取建筑的碰撞体范围
+    UBoxComponent* BuildCollision = NewBuilding->FindComponentByClass<UBoxComponent>();
+    if (!BuildCollision)
+    {
+        NewBuilding->Destroy();
+        UE_LOG(LogTemp , Warning , TEXT("BuildCollision is nullptr"));
+        return false;
+    }
+
+    FVector Extents = BuildCollision->GetScaledBoxExtent();
+
+    // 检查位置是否可用
+    if (CheckBuildLocation(Location, Rotation, Extents))
+    {
+        NewBuilding->Destroy();
+        return false;
+    }
 
     return NewBuilding != nullptr;
 }
@@ -75,19 +83,30 @@ bool UBuildSubsystem::CheckBuildLocation(const FVector& Location, const FRotator
         CollisionParams
     );
 
+    UE_LOG(LogTemp , Warning , TEXT("%s") , bHit? TEXT("TRUE") : TEXT("FALSE"));
+
     return bHit;
 }
 
-void UBuildSubsystem::ShowPreview(TSubclassOf<AActor> BuildingTemplate, const FVector& Location, const FRotator& Rotation)
+bool UBuildSubsystem::ShowPreview(TSubclassOf<AActor> BuildingTemplate, const FVector& Location, const FRotator& Rotation)
 {
-    if (!BuildingTemplate) return;
+    if (!BuildingTemplate)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("BuildingTemplate is nullptr"));
+        return false;
+    }
 
     UWorld* World = GetWorld();
-    if (!World) return;
+    if (!World)
+    {
+        UE_LOG(LogTemp, Warning, TEXT("World is not exitst"));
+        return false;
+    }
 
     // 如果预览已存在，先销毁
     if (PreviewBuilding)
     {
+        UE_LOG(LogTemp, Warning, TEXT("PreviewBuilding is exist"));
         PreviewBuilding->Destroy();
     }
 
@@ -101,6 +120,16 @@ void UBuildSubsystem::ShowPreview(TSubclassOf<AActor> BuildingTemplate, const FV
         Rotation,
         SpawnParams
     );
+
+    SpawnLocation = Location;
+
+    if (PreviewBuilding == nullptr)
+    {
+        SpawnLocation = FVector::ZeroVector;
+        UE_LOG(LogTemp, Warning, TEXT("PreviewBuilding is failed"));
+        return false;
+    }
+    return true;
 }
 
 void UBuildSubsystem::HidePreview()
