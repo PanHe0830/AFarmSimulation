@@ -18,58 +18,16 @@ void UBuildSubsystem::Deinitialize()
 	Super::Deinitialize();
 }
 
-bool UBuildSubsystem::CanBuildAtLocation(const FVector& Location, const FRotator& Rotation, const FVector& Extents) const
-{
-    return !CheckBuildLocation(Location, Rotation, Extents);
-}
-
-bool UBuildSubsystem::TryBuildAtLocation(TSubclassOf<AActor> BuildingToPlace, const FVector& Location, const FRotator& Rotation)
-{
-    if (!BuildingToPlace) return false;
-
-    // 生成建筑
-    UWorld* World = GetWorld();
-    if (!World) return false;
-
-    FActorSpawnParameters SpawnParams;
-    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
-    AActor* NewBuilding = World->SpawnActor<AActor>(
-        BuildingToPlace,
-        Location,
-        Rotation,
-        SpawnParams
-    );
-
-    // 获取建筑的碰撞体范围
-    UBoxComponent* BuildCollision = NewBuilding->FindComponentByClass<UBoxComponent>();
-    if (!BuildCollision)
-    {
-        NewBuilding->Destroy();
-        UE_LOG(LogTemp , Warning , TEXT("BuildCollision is nullptr"));
-        return false;
-    }
-
-    FVector Extents = BuildCollision->GetScaledBoxExtent();
-
-    // 检查位置是否可用
-    if (CheckBuildLocation(Location, Rotation, Extents))
-    {
-        NewBuilding->Destroy();
-        return false;
-    }
-
-    return NewBuilding != nullptr;
-}
-
 bool UBuildSubsystem::CheckBuildLocation(const FVector& Location, const FRotator& Rotation, const FVector& Extents) const
 {
     UWorld* World = GetWorld();
-    if (!World) return true;
+    if (!World) return false;
+
+    //UE_LOG(LogTemp, Warning, TEXT("Location is : %s  --  Extents is : %s"), *Location.ToString() , *Extents.ToString());
 
     // 设置碰撞查询参数
     FCollisionQueryParams CollisionParams;
-    CollisionParams.AddIgnoredActor(UGameplayStatics::GetPlayerPawn(World, 0)); // 忽略玩家
+    CollisionParams.AddIgnoredActor(PreviewBuilding); // 忽略附加到的Actor
 
     // 执行盒体追踪检测
     FHitResult HitResult;
@@ -78,41 +36,40 @@ bool UBuildSubsystem::CheckBuildLocation(const FVector& Location, const FRotator
         Location,
         Location,
         Rotation.Quaternion(),
-        ECC_WorldStatic, // 使用适合你项目的碰撞通道
+        ECC_WorldDynamic, // 使用适合你项目的碰撞通道
         FCollisionShape::MakeBox(Extents),
         CollisionParams
     );
 
-    UE_LOG(LogTemp , Warning , TEXT("%s") , bHit? TEXT("TRUE") : TEXT("FALSE"));
+    //if (HitResult.GetActor())
+    //{
+    //    UE_LOG(LogTemp, Warning, TEXT("%s  hitname = %s") , *HitResult.BoneName.ToString() , *HitResult.GetActor()->GetName());
+    //}
+
+    //DrawDebugBox(GetWorld(), Location, Extents , FColor::Blue);
+
+    //if (bHit)
+    //{
+    //    UE_LOG(LogTemp, Warning, TEXT("bHit is true"));
+    //}
+    //else
+    //{
+    //    UE_LOG(LogTemp, Warning, TEXT("bHit is false"));
+    //}
+
+    //UBoxComponent* BoxComponent = PreviewBuilding->GetComponentByClass<UBoxComponent>();
+    //if (BoxComponent)
+    //{
+    //    BoxComponent->OnComponentHit
+    //}
 
     return bHit;
 }
 
-bool UBuildSubsystem::ShowPreview(TSubclassOf<AActor> BuildingTemplate, const FVector& Location, const FRotator& Rotation)
+bool UBuildSubsystem::BuildSystemSpawnActor(TSubclassOf<AActor> BuildingTemplate, const FVector& Location, const FRotator& Rotation, FActorSpawnParameters SpawnParams)
 {
-    if (!BuildingTemplate)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("BuildingTemplate is nullptr"));
-        return false;
-    }
-
     UWorld* World = GetWorld();
-    if (!World)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("World is not exitst"));
-        return false;
-    }
-
-    // 如果预览已存在，先销毁
-    if (PreviewBuilding)
-    {
-        UE_LOG(LogTemp, Warning, TEXT("PreviewBuilding is exist"));
-        PreviewBuilding->Destroy();
-    }
-
-    // 创建预览建筑
-    FActorSpawnParameters SpawnParams;
-    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+    if (!World) return false;
 
     PreviewBuilding = World->SpawnActor<AActor>(
         BuildingTemplate,
@@ -121,18 +78,74 @@ bool UBuildSubsystem::ShowPreview(TSubclassOf<AActor> BuildingTemplate, const FV
         SpawnParams
     );
 
-    SpawnLocation = Location;
+    if (PreviewBuilding)
+    {
+        TArray<UBoxComponent*> BoxComponents;
+        PreviewBuilding->GetComponents<UBoxComponent>(BoxComponents);
 
-    if (PreviewBuilding == nullptr)
+        for (auto ite : BoxComponents)
+        {
+            ite->SetHiddenInGame(false);  // 关键：在游戏中显示
+            ite->SetVisibility(true, true);
+            ite->SetLineThickness(2.0f);  // 设置线框粗细
+        }
+
+        return true;
+    }
+    return false;
+}
+
+void UBuildSubsystem::SetCollisionBoxColor()
+{
+    TArray<UBoxComponent*> BoxComponents;
+    PreviewBuilding->GetComponents<UBoxComponent>(BoxComponents);
+
+    for (int i = 0; i < BoxComponents.Num(); i++)
+    {
+        FVector BoxExtents = BoxComponents[i]->GetScaledBoxExtent();
+        FVector BoxLocation = BoxComponents[i]->GetComponentLocation();
+        FRotator BoxRotation = BoxComponents[i]->GetComponentRotation();
+
+        bool bFlag = CheckBuildLocation(BoxLocation, BoxRotation, BoxExtents);
+        // 检查位置是否可用
+        if (bFlag)
+        {
+            // 有碰撞 红色
+            BoxComponents[i]->ShapeColor = FColor::Red;
+            //UE_LOG(LogTemp, Warning, TEXT("有碰撞"));
+        }
+        else
+        {
+            // 无碰撞 绿色
+            BoxComponents[i]->ShapeColor = FColor::Green;
+        }
+    }
+}
+
+bool UBuildSubsystem::ShowPreview(TSubclassOf<AActor> BuildingTemplate, const FVector& Location, const FRotator& Rotation)
+{
+    if (!BuildingTemplate) return false; //if (PreviewBuilding) PreviewBuilding->Destroy();
+
+    // 创建预览建筑
+    FActorSpawnParameters SpawnParams;
+    SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+    if (BuildSystemSpawnActor(BuildingTemplate, Location, Rotation, SpawnParams))
+    {
+        SpawnLocation = Location;
+    }
+    else
     {
         SpawnLocation = FVector::ZeroVector;
-        UE_LOG(LogTemp, Warning, TEXT("PreviewBuilding is failed"));
         return false;
     }
+
+    SetCollisionBoxColor();
+
     return true;
 }
 
-void UBuildSubsystem::HidePreview()
+void UBuildSubsystem::DestoryCurrentActor()
 {
     if (PreviewBuilding)
     {
@@ -145,4 +158,44 @@ void UBuildSubsystem::ChangePreviewActorPosition(FVector position)
 {
     if (PreviewBuilding == nullptr) return;
     PreviewBuilding->SetActorLocation(position);
+
+    SpawnLocation = position;
+
+    SetCollisionBoxColor();
+}
+
+void UBuildSubsystem::SetCollisionBoxVisibilityHide()
+{
+    TArray<UBoxComponent*> BoxComponents;
+    PreviewBuilding->GetComponents<UBoxComponent>(BoxComponents);
+
+    for (int i = 0; i < BoxComponents.Num(); i++)
+    {
+        BoxComponents[i]->SetHiddenInGame(true);  
+        BoxComponents[i]->SetVisibility(false, true);
+        BoxComponents[i]->SetLineThickness(0.0f);  // 设置线框粗细
+
+        BoxComponents[i]->SetComponentTickEnabled(false);
+
+        UE_LOG(LogTemp, Warning, TEXT("Component Valid: %d"), IsValid(BoxComponents[i]));
+        UE_LOG(LogTemp, Warning, TEXT("HiddenInGame: %d"), BoxComponents[i]->bHiddenInGame);
+    }
+
+    PreviewBuilding->SetActorLocation(SpawnLocation);
+}
+
+bool UBuildSubsystem::GetCurrentIsRight()
+{
+    TArray<UBoxComponent*> BoxComponents;
+    PreviewBuilding->GetComponents<UBoxComponent>(BoxComponents);
+
+    for (int i = 0; i < BoxComponents.Num(); i++)
+    {
+        if (BoxComponents[i]->ShapeColor == FColor::Red)
+        {
+            return false;
+        }
+    }
+
+    return true;
 }

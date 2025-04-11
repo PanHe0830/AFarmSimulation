@@ -87,28 +87,14 @@ void AAFarmPlayerController::SwitchCameraView()
 
 void AAFarmPlayerController::MouseLeftClicked()
 {
-    //FHitResult HitResult;
-    //GetHitResultUnderCursor(ECC_Visibility, false, HitResult); // ECC_Visibility 表示检测可见物体
-    FRotator rotator(0, 0, 0);
     UBuildSubsystem* Build = GetGameInstance()->GetSubsystem<UBuildSubsystem>();
-    if (Build)
+    if (Build->GetCurrentIsRight())
     {
-        Build->HidePreview();
-        Build->TryBuildAtLocation(TreeClass, SpawnLocation, rotator);
-    }
-    
-    //UWorld* World = GetWorld();
-    //if (World && TreeClass)
-    //{
-    //    World->SpawnActor<ATreeActor>( 
-    //        TreeClass, 
-    //        HitResult.Location,
-    //        rotator
-    //    );
-    //}
+        Build->SetCollisionBoxVisibilityHide();
 
-    InputComponent->RemoveActionBinding("MouseLeftClicked", IE_Pressed);
-    InputComponent->RemoveAxisBinding("BuildMouseXY");
+        InputComponent->RemoveActionBinding("MouseLeftClicked", IE_Pressed);
+        InputComponent->RemoveAxisBinding("BuildMouseXY");
+    }
 }
 
 void AAFarmPlayerController::OpenBuildMode()
@@ -123,7 +109,7 @@ void AAFarmPlayerController::OpenBuildMode()
     UBuildSubsystem* Build = GetGameInstance()->GetSubsystem<UBuildSubsystem>();
     if (Build)
     {
-        UE_LOG(LogTemp, Warning, TEXT("Build is success"));
+        //UE_LOG(LogTemp, Warning, TEXT("Build is success"));
         if (Build->ShowPreview(TreeClass, HitResult.Location, Ratotor))
         {
             SpawnLocation = HitResult.Location;
@@ -133,14 +119,6 @@ void AAFarmPlayerController::OpenBuildMode()
 
 void AAFarmPlayerController::MouseXY(float XY)
 {
-    //float MouseX;
-    //float MouseY;
-    //GetMousePosition(MouseX, MouseY);
-    //
-    //FVector wordLocation;
-    //FVector worldDirection;
-    //DeprojectMousePositionToWorld(wordLocation, worldDirection);
-
     FHitResult HitResult;
     GetHitResultUnderCursor(ECC_WorldStatic, false, HitResult); // ECC_Visibility 表示检测可见物体
 
@@ -149,7 +127,6 @@ void AAFarmPlayerController::MouseXY(float XY)
     if (Build)
     {
         Build->ChangePreviewActorPosition(HitResult.Location);
-        //UE_LOG(LogTemp, Warning, TEXT("%s"), *HitResult.Location.ToString());
     }
     
 }

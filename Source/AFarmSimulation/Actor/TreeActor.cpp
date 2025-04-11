@@ -10,16 +10,12 @@ ATreeActor::ATreeActor()
 {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
-
-	TreeBoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("TreeBox"));
-	TreeBoxComponent->SetupAttachment(RootComponent);
 }
 
 // Called when the game starts or when spawned
 void ATreeActor::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
@@ -29,3 +25,7 @@ void ATreeActor::Tick(float DeltaTime)
 
 }
 
+void ATreeActor::OnHitTreeBox(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
+{
+
+}
