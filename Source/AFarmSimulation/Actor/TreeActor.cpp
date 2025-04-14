@@ -24,8 +24,3 @@ void ATreeActor::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 
 }
-
-void ATreeActor::OnHitTreeBox(UPrimitiveComponent* HitComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
-{
-
-}
